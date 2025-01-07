@@ -38,11 +38,11 @@ body {
 }
 
 .piece.playerA {
-  background-color: #fff;
+  background-color: #000;
 }
 
 .piece.playerB {
-  background-color: #000;
+  background-color: #fff;
 }
 
 .button {
@@ -74,4 +74,9 @@ body {
 
 .valid-move:hover {
   background-color: brown;
+}
+
+.jump-end {
+  border: 2px solid red;
+  box-shadow: 0 0 10px red;
 }
