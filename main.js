@@ -89,7 +89,6 @@ document.addEventListener("DOMContentLoaded", function () {
           jumpedThisTurn = true;
         }
 
-        // Keep the player logic for promotion to king
         if ((row === 0 && boardState[row][col] === -1) || (row === 7 && boardState[row][col] === 1)) {
           boardState[row][col] = boardState[row][col] > 0 ? 2 : -2;
         }
@@ -119,21 +118,21 @@ document.addEventListener("DOMContentLoaded", function () {
   function getValidMoves(row, col) {
     const moves = [];
     const piece = boardState[row][col];
-    const isDamka = Math.abs(piece) === 2;
-
+    const isKing = Math.abs(piece) === 2;
+  
     const directions = [
       [-1, -1], [-1, 1], [1, -1], [1, 1],
     ];
-
-    if (isDamka) {
+  
+    if (isKing) {
       directions.forEach(([dRow, dCol]) => {
         let newRow = row + dRow;
         let newCol = col + dCol;
         let jumped = false;
-
+  
         while (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
           const targetPiece = boardState[newRow][newCol];
-
+  
           if (targetPiece === 0) {
             if (!jumped) {
               moves.push({ row: newRow, col: newCol });
@@ -143,7 +142,7 @@ document.addEventListener("DOMContentLoaded", function () {
           } else if (!jumped && Math.sign(targetPiece) !== Math.sign(piece)) {
             const jumpRow = newRow + dRow;
             const jumpCol = newCol + dCol;
-
+  
             if (
               jumpRow >= 0 && jumpRow < 8 &&
               jumpCol >= 0 && jumpCol < 8 &&
@@ -213,8 +212,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (moveToMake) {
       const { from, to } = moveToMake;
 
-      console.log(`ИИ делает ход: из (${from.row}, ${from.col}) в (${to.row}, ${to.col})`);
-
       boardState[to.row][to.col] = boardState[from.row][from.col];
       boardState[from.row][from.col] = 0;
 
@@ -224,6 +221,14 @@ document.addEventListener("DOMContentLoaded", function () {
         jumpedThisTurn = true;
       }
 
+      if (to.row === 0 && boardState[to.row][to.col] === 1) {
+        boardState[to.row][to.col] = 2;
+      }
+  
+      if (to.row === 7 && boardState[to.row][to.col] === 1) {
+        boardState[to.row][to.col] = 2;
+      }
+  
       renderBoard();
 
       if (jumpedThisTurn) {
