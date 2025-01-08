@@ -80,3 +80,15 @@ body {
   border: 2px solid red;
   box-shadow: 0 0 10px red;
 }
+
+.king-white {
+  background-color: gold;
+  border: 2px solid #333;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
+}
+
+.king-black {
+  background-color: darkgoldenrod;
+  border: 2px solid #333;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
+}
