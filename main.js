@@ -42,8 +42,8 @@ document.addEventListener("DOMContentLoaded", function () {
             pieceElement.classList.add("selected-piece");
           }
 
-          if (Math.abs(piece) === 2) {
-            pieceElement.classList.add("king");
+          if (Math.abs(piece) === 2 || Math.abs(piece) === -2) {
+            pieceElement.classList.add(piece > 0 ? "king-white" : "king-black");
           }
 
           pieceElement.addEventListener("click", () => onPieceClick(row, col));
@@ -107,62 +107,69 @@ document.addEventListener("DOMContentLoaded", function () {
   function getValidMoves(row, col) {
     const moves = [];
     const piece = boardState[row][col];
-    const directions = piece === 1 || piece === -1
-      ? piece === -1
+  
+    const normalDirections =
+      piece === 1
+        ? [[1, -1], [1, 1]]
+        : piece === -1
         ? [[-1, -1], [-1, 1]]
-        : [[1, -1], [1, 1]]
-      : [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+        : [];
   
-    directions.forEach(([dRow, dCol]) => {
-      let newRow = row + dRow;
-      let newCol = col + dCol;
+    const jumpDirections = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
   
-      while (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-        const targetPiece = boardState[newRow][newCol];
-        if (targetPiece === 0) {
-          moves.push({ row: newRow, col: newCol, from: { row, col } });
-        } else if (Math.sign(targetPiece) !== Math.sign(piece)) {
-          const jumpRow = newRow + dRow;
-          const jumpCol = newCol + dCol;
+    function checkMoves(directions, isJump = false) {
+      directions.forEach(([dRow, dCol]) => {
+        let newRow = row + dRow;
+        let newCol = col + dCol;
   
-          if (
-            jumpRow >= 0 &&
-            jumpRow < 8 &&
-            jumpCol >= 0 &&
-            jumpCol < 8 &&
-            boardState[jumpRow][jumpCol] === 0
-          ) {
-            moves.push({
-              row: jumpRow,
-              col: jumpCol,
-              from: { row, col },
-              jump: { row: newRow, col: newCol },
-            });
+        while (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+          const targetPiece = boardState[newRow][newCol];
+  
+          if (!isJump && targetPiece === 0) {
+            moves.push({ row: newRow, col: newCol, from: { row, col } });
+            break;
+          } else if (isJump && Math.sign(targetPiece) !== Math.sign(piece) && targetPiece !== 0) {
+            const jumpRow = newRow + dRow;
+            const jumpCol = newCol + dCol;
+  
+            if (
+              jumpRow >= 0 &&
+              jumpRow < 8 &&
+              jumpCol >= 0 &&
+              jumpCol < 8 &&
+              boardState[jumpRow][jumpCol] === 0
+            ) {
+              moves.push({
+                row: jumpRow,
+                col: jumpCol,
+                from: { row, col },
+                jump: { row: newRow, col: newCol },
+              });
+            }
+            break;
+          } else {
+            break;
           }
-          break;
-        } else {
-          break;
         }
+      });
+    }
   
-        if (piece === 2 || piece === -2) {
-          newRow += dRow;
-          newCol += dCol;
-        } else {
-          break;
-        }
-      }
-    });
-  
+    checkMoves(jumpDirections, true);
     const jumpMoves = moves.filter((m) => m.jump);
-    return jumpMoves.length > 0 ? jumpMoves : moves;
+  
+    if (jumpMoves.length > 0) return jumpMoves;
+  
+    if (piece === 1 || piece === -1) {
+      checkMoves(normalDirections, false);
+    }
+  
+    return moves;
   }
-  
-  
 
   function makeAIMove() {
     if (currentTurn !== "AI") return;
   
-    let move = alphaBeta(boardState, 5, -Infinity, Infinity, true);
+    let move = alphaBeta(boardState, 7, -Infinity, Infinity, true);
   
     console.log("AI Selected Move:", move);
   
@@ -188,11 +195,6 @@ document.addEventListener("DOMContentLoaded", function () {
   
     renderBoard();
     currentTurn = "player";
-  
-    if (getAllPossibleMoves(-1).length === 0) {
-      alert("AI wins!");
-      return;
-    }
   }
 
   function alphaBeta(state, depth, alpha, beta, maximizingPlayer) {
