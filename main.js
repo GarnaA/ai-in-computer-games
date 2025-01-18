@@ -104,17 +104,9 @@ document.addEventListener("DOMContentLoaded", function () {
   function getValidMoves(row, col) {
     const moves = [];
     const piece = boardState[row][col];
+    const directions = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
   
-    const normalDirections =
-      piece === 1
-        ? [[1, -1], [1, 1]]
-        : piece === -1
-        ? [[-1, -1], [-1, 1]]
-        : [];
-  
-    const jumpDirections = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
-  
-    function checkMoves(directions, isJump = false) {
+    if (Math.abs(piece) === 2) {
       directions.forEach(([dRow, dCol]) => {
         let newRow = row + dRow;
         let newCol = col + dCol;
@@ -122,10 +114,9 @@ document.addEventListener("DOMContentLoaded", function () {
         while (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
           const targetPiece = boardState[newRow][newCol];
   
-          if (!isJump && targetPiece === 0) {
+          if (targetPiece === 0) {
             moves.push({ row: newRow, col: newCol, from: { row, col } });
-            break;
-          } else if (isJump && Math.sign(targetPiece) !== Math.sign(piece) && targetPiece !== 0) {
+          } else if (Math.sign(targetPiece) !== Math.sign(piece)) {
             const jumpRow = newRow + dRow;
             const jumpCol = newCol + dCol;
   
@@ -147,20 +138,68 @@ document.addEventListener("DOMContentLoaded", function () {
           } else {
             break;
           }
+          newRow += dRow;
+          newCol += dCol;
+        }
+      });
+    } else {
+      const normalDirections =
+        piece === 1
+          ? [[1, -1], [1, 1]]
+          : piece === -1
+          ? [[-1, -1], [-1, 1]]
+          : [];
+  
+      normalDirections.forEach(([dRow, dCol]) => {
+        const newRow = row + dRow;
+        const newCol = col + dCol;
+  
+        if (
+          newRow >= 0 &&
+          newRow < 8 &&
+          newCol >= 0 &&
+          newCol < 8 &&
+          boardState[newRow][newCol] === 0
+        ) {
+          moves.push({ row: newRow, col: newCol, from: { row, col } });
+        }
+      });
+  
+      directions.forEach(([dRow, dCol]) => {
+        const newRow = row + dRow;
+        const newCol = col + dCol;
+  
+        if (
+          newRow >= 0 &&
+          newRow < 8 &&
+          newCol >= 0 &&
+          newCol < 8 &&
+          Math.sign(boardState[newRow][newCol]) !== Math.sign(piece) &&
+          boardState[newRow][newCol] !== 0
+        ) {
+          const jumpRow = newRow + dRow;
+          const jumpCol = newCol + dCol;
+  
+          if (
+            jumpRow >= 0 &&
+            jumpRow < 8 &&
+            jumpCol >= 0 &&
+            jumpCol < 8 &&
+            boardState[jumpRow][jumpCol] === 0
+          ) {
+            moves.push({
+              row: jumpRow,
+              col: jumpCol,
+              from: { row, col },
+              jump: { row: newRow, col: newCol },
+            });
+          }
         }
       });
     }
   
-    checkMoves(jumpDirections, true);
     const jumpMoves = moves.filter((m) => m.jump);
-  
-    if (jumpMoves.length > 0) return jumpMoves;
-  
-    if (piece === 1 || piece === -1) {
-      checkMoves(normalDirections, false);
-    }
-  
-    return moves;
+    return jumpMoves.length > 0 ? jumpMoves : moves;
   }
 
   function makeAIMove() {
