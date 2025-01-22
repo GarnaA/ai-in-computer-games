@@ -212,7 +212,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function makeAIMove() {
     if (currentTurn !== "AI") return;
   
-    let move = alphaBeta(boardState, 7, -Infinity, Infinity, true);
+    let move = alphaBeta(boardState, 8, -Infinity, Infinity, true);
   
     console.log("AI Selected Move:", move);
   
@@ -326,8 +326,8 @@ document.addEventListener("DOMContentLoaded", function () {
     for (let row = 0; row < 8; row++) {
       for (let col = 0; col < 8; col++) {
         const piece = state[row][col];
-        if (piece === 1) score += 5 + row;
-        if (piece === -1) score -= 5 - row;
+        if (piece === 1) score += 5;
+        if (piece === -1) score -= 5;
         if (piece === 2) score += 10;
         if (piece === -2) score -= 10;
       }
