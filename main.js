@@ -110,13 +110,18 @@ document.addEventListener("DOMContentLoaded", function () {
       directions.forEach(([dRow, dCol]) => {
         let newRow = row + dRow;
         let newCol = col + dCol;
+        let captured = false;
   
         while (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
           const targetPiece = boardState[newRow][newCol];
   
-          if (targetPiece === 0) {
+          if (targetPiece === 0 && !captured) {
             moves.push({ row: newRow, col: newCol, from: { row, col } });
-          } else if (Math.sign(targetPiece) !== Math.sign(piece)) {
+          } else if (
+            targetPiece !== 0 &&
+            Math.sign(targetPiece) !== Math.sign(piece) &&
+            !captured
+          ) {
             const jumpRow = newRow + dRow;
             const jumpCol = newCol + dCol;
   
@@ -133,8 +138,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 from: { row, col },
                 jump: { row: newRow, col: newCol },
               });
+              captured = true;
+            } else {
+              break;
             }
-            break;
           } else {
             break;
           }
@@ -327,15 +334,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const moves = [];
     for (let row = 0; row < 8; row++) {
       for (let col = 0; col < 8; col++) {
-        if (boardState[row][col] === player) {
-          for (const move of getValidMoves(row, col)) {
-            moves.push({ from: { row, col }, to: move, jump: move.jump });
+        if (Math.sign(boardState[row][col]) === player) {
+          const pieceMoves = getValidMoves(row, col);
+          for (const move of pieceMoves) {
+            moves.push({
+              from: { row, col },
+              to: { row: move.row, col: move.col },
+              jump: move.jump,
+            });
           }
         }
       }
     }
-  
-    console.log(`Player: ${player}, Possible Moves:`, moves);
     return moves.sort((a, b) => (b.jump ? 1 : 0) - (a.jump ? 1 : 0));
   }
   
