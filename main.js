@@ -225,14 +225,14 @@ document.addEventListener("DOMContentLoaded", function () {
       if (to.row === 7 && boardState[to.row][to.col] === 1) {
         boardState[to.row][to.col] = 2;
       }
-
+  
       if (jump) {
         boardState[jump.row][jump.col] = 0;
         const furtherMoves = getValidMoves(to.row, to.col).filter((m) => m.jump);
   
         if (furtherMoves.length > 0) {
           console.log("AI continues jumping...");
-          move = alphaBeta(simulateMove(boardState, { from: to, to: furtherMoves[0].to, jump: furtherMoves[0].jump }), 6, -Infinity, Infinity, true);
+          move = alphaBeta(simulateMove(boardState, { from: to, to: furtherMoves[0].to, jump: furtherMoves[0].jump }), 1, -Infinity, Infinity, true);
           continue;
         }
       }
@@ -241,8 +241,14 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   
     renderBoard();
+
     currentTurn = "player";
-  }  
+
+    if (isGameOver()) {
+      return;
+    }
+    currentTurn = "player";
+  }
 
   function alphaBeta(state, depth, alpha, beta, maximizingPlayer) {
 
@@ -348,11 +354,56 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     return moves.sort((a, b) => (b.jump ? 1 : 0) - (a.jump ? 1 : 0));
   }
-  
 
-  function isGameOver(state) {
-    return getAllPossibleMoves(1).length === 0 || getAllPossibleMoves(-1).length === 0;
+  function displayWinner(message) {
+    const winnerMessage = document.createElement("div");
+    winnerMessage.className = "winner-message";
+    winnerMessage.textContent = message;
+  
+    const overlay = document.createElement("div");
+    overlay.className = "overlay";
+    overlay.appendChild(winnerMessage);
+
+    document.body.appendChild(overlay);
   }
+
+  function isGameOver() {
+    const playerMoves = getAllPossibleMoves(-1); 
+    const aiMoves = getAllPossibleMoves(1);
+  
+    const playerPieces = countPieces(-1);
+    const aiPieces = countPieces(1);
+  
+    if (playerPieces === 0) {
+      displayWinner("AI (Black pieces) wins!");
+      return true;
+    } else if (aiPieces === 0) {
+      displayWinner("Player (White pieces) wins!");
+      return true;
+    }
+  
+    if (playerMoves.length === 0) {
+      displayWinner("AI (Black pieces) wins!");
+      return true;
+    } else if (aiMoves.length === 0) {
+      displayWinner("Player (White pieces) wins!");
+      return true;
+    }
+  
+    return false;
+  }
+  
+  function countPieces(player) {
+    let pieceCount = 0;
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        if (boardState[row][col] === player || boardState[row][col] === player * 2) {
+          pieceCount++;
+        }
+      }
+    }
+    return pieceCount;
+  }  
 
   document.getElementById("restart").addEventListener("click", () => {
     location.reload();
