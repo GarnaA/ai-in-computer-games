@@ -214,8 +214,6 @@ document.addEventListener("DOMContentLoaded", function () {
   
     let move = alphaBeta(boardState, 8, -Infinity, Infinity, true);
   
-    console.log("AI Selected Move:", move);
-  
     while (move && move.from && move.to) {
       const { from, to, jump } = move;
   
@@ -231,12 +229,10 @@ document.addEventListener("DOMContentLoaded", function () {
         const furtherMoves = getValidMoves(to.row, to.col).filter((m) => m.jump);
   
         if (furtherMoves.length > 0) {
-          console.log("AI continues jumping...");
           move = alphaBeta(simulateMove(boardState, { from: to, to: furtherMoves[0].to, jump: furtherMoves[0].jump }), 1, -Infinity, Infinity, true);
           continue;
         }
       }
-  
       break;
     }
   
@@ -251,19 +247,15 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function alphaBeta(state, depth, alpha, beta, maximizingPlayer) {
-
-    console.log(`AlphaBeta: Depth ${depth}, Maximizing ${maximizingPlayer}`);
     const possibleMoves = maximizingPlayer
       ? getAllPossibleMoves(1)
       : getAllPossibleMoves(-1);
   
-    console.log("Possible moves:", possibleMoves);
     if (depth === 0 || isGameOver(state)) {
       return { score: evaluateBoard(state) };
     }
   
     if (!possibleMoves || possibleMoves.length === 0) {
-      console.warn("No possible moves:", { maximizingPlayer, state });
       return { score: maximizingPlayer ? -Infinity : Infinity };
     }
   
@@ -271,7 +263,6 @@ document.addEventListener("DOMContentLoaded", function () {
   
     for (const move of possibleMoves) {
       if (!move.from || !move.to) {
-        console.error("Skipping invalid move in alphaBeta:", move);
         continue;
       }
   
@@ -300,13 +291,9 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   
   function simulateMove(state, move) {
-
-    console.log("Simulating move:", move);
     if (!move || !move.from || !move.to) {
-      console.error("Invalid move passed to simulateMove:", move);
       return state;
     }
-  
     const newState = JSON.parse(JSON.stringify(state));
     const { from, to, jump } = move;
   
